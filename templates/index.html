@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atator Web - Registro Parte 66</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #005a9e;
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-green {
+            background-color: #107c10;
+        }
+
+        .btn-green:hover {
+            background-color: #0b5a0b;
+        }
+
+        .btn-red {
+            background-color: #d13438;
+        }
+
+        .btn-red:hover {
+            background-color: #a80000;
+        }
+
+        .btn-gray {
+            background-color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #555;
+        }
+
+        .json-upload {
+            background: #eef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Registro de Experiencia (Parte 66)</h1>
+
+        <!-- Carga de JSON -->
+        <div class="json-upload">
+            <form action="/upload_json" method="POST" enctype="multipart/form-data"
+                style="display:flex; width:100%; gap:10px; align-items:center;">
+                <div style="flex:1;">
+                    <label for="file" style="margin:0;">Cargar Backup JSON:</label>
+                    <input type="file" name="file" id="file" accept=".json">
+                </div>
+                <button type="submit" class="btn-gray" style="width:auto;">Cargar</button>
+            </form>
+        </div>
+
+        <!-- Formulario -->
+        <form action="{{ '/update/' ~ edit_id if edit_entry else '/add' }}" method="POST">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Capítulo ATA</label>
+                        <select name="ata" required>
+                            {% for ata in atas %}
+                            <option value="{{ ata }}" {% if edit_entry and edit_entry.ata==ata %}selected{% endif %}>{{
+                                ata }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" name="fecha" required value="{{ edit_entry.fecha if edit_entry else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Modelo Aeronave</label>
+                        <input type="text" name="modelo" placeholder="Ej: A320" required
+                            value="{{ edit_entry.modelo if edit_entry else '' }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label>Matrícula</label>
+                        <input type="text" name="matricula" placeholder="Ej: EC-MKL" required
+                            value="{{ edit_entry.matricula if edit_entry else 'EC-' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción de Tarea</label>
+                <textarea name="descripcion" rows="3" placeholder="Describe la tarea..."
+                    required>{{ edit_entry.descripcion if edit_entry else '' }}</textarea>
+            </div>
+
+            {% if edit_entry %}
+            <div style="display:flex; gap:10px;">
+                <button type="submit" style="background-color:#0078d4;">Actualizar Entrada</button>
+                <a href="/" style="width:100%;"><button type="button"
+                        style="background-color:#666;">Cancelar</button></a>
+            </div>
+            {% else %}
+            <button type="submit">Añadir Entrada</button>
+            {% endif %}
+        </form>
+
+        <!-- Tabla -->
+        {% if entries %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ATA</th>
+                    <th>Descripción</th>
+                    <th>Modelo</th>
+                    <th>Matrícula</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.ata.split(' - ')[0] }}</td>
+                    <td>{{ entry.descripcion }}</td>
+                    <td>{{ entry.modelo }}</td>
+                    <td>{{ entry.matricula }}</td>
+                    <td>{{ entry.fecha }}</td>
+                    <td style="display:flex; gap:5px;">
+                        <a href="/edit/{{ loop.index0 }}"><button class="btn-green"
+                                style="padding:5px 10px; font-size:12px;">Editar</button></a>
+                        <a href="/delete/{{ loop.index0 }}"><button class="btn-red"
+                                style="padding:5px 10px; font-size:12px;"
+                                onclick="return confirm('¿Seguro?');">Borrar</button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <a href="/generate_pdf" style="text-decoration:none; flex:1;">
+                <button class="btn-green">Generar y Descargar PDF</button>
+            </a>
+            <a href="/download_json" style="text-decoration:none; flex:1;">
+                <button class="btn-gray">Descargar Backup (JSON)</button>
+            </a>
+            <a href="/clear" style="text-decoration:none;">
+                <button class="btn-red">Borrar Todo</button>
+            </a>
+        </div>
+        {% else %}
+        <p style="text-align:center; color:#888; margin-top:30px;">No hay entradas registradas.</p>
+        {% endif %}
+
+    </div>
+
+    <script>
+        // Poner fecha de hoy por defecto si el campo está vacío (modo añadir)
+        const dateInput = document.querySelector('input[type="date"]');
+        if (dateInput && !dateInput.value) {
+            dateInput.valueAsDate = new Date();
+        }
+    </script>
+
+</body>
+
+</html>
